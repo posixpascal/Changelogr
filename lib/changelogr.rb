@@ -21,8 +21,9 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 
 		def initialize options = {}
 			defaults = {
-				:name => "Your application",
+				:name => "Changelogr",
 				:logo => "",
+				:output => "CHANGELOG.md",
 				:header => "Automated generated changelog",
 				:contributors => true,
 				:overwrite => true,
@@ -129,18 +130,20 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 
 			version = @config[:version]
 			if not version # get version from last tag (and bump it)
-				version = @git.tags.last.name
-				if version.start_with? "v"
-					version.sub!("v", "")
-					version = version.split(".")
-					version.map!(&:to_i)
-					while	version.size < 3
-						version << 0
-					end
-					version[2] = version[2] +  1
-					version = version.join(".")
-				else # no tag, lets ignore version
-					version = false
+				if @git.tags.last.nil?
+						version = false
+				else
+					version = @git.tags.last.name
+					if version.start_with? "v"
+						version.sub!("v", "")
+						version = version.split(".")
+						version.map!(&:to_i)
+						while	version.size < 3
+							version << 0
+						end
+						version[2] = version[2] +  1
+						version = version.join(".")
+					end # no tag, lets ignore version
 				end
 			end
 			
