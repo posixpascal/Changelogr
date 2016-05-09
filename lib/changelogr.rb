@@ -75,7 +75,7 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 					:commit_group => "templates/commit_group.md.erb",
 					:contributor => "templates/contributor.md.erb"
 				},
-				:repo_url => "https://github.com/posixpascal/Changelogr"
+				:repo_url => "https://github.com/posixpascal/Changelogr",
 				:groups => true,
 				:start_from => [:commit, :first],
 				:link_commit_hash => true,
