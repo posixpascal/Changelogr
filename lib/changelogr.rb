@@ -89,6 +89,7 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 			@git = Repository.new(@config[:repository])
 			output = @config[:output]
 			start_from = get_starting_sha()
+			puts "All commits until: #{start_from}"
 			commits = []
 			@git.commits.each { |commit|
 				break if commit.sha == start_from
@@ -251,10 +252,10 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 
 
 			if @config[:start_from][0] == :commit and @config[:start_from][1] == :first
-				return commits.first.sha
+				return commits.last.sha
 			end
 
-			return commits.first.sha
+			return commits.last.sha
 
 		end
 	end
