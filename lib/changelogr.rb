@@ -44,8 +44,16 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 						:match => /docs(?:\((?<group>.+)\))?\: (?<message>.+)/
 					},
 					:style => {
-						:title => "Code Style chanes",
+						:title => "Code Style changes",
 						:match => /style(?:\((?<group>.+)\))?\: (?<message>.+)/
+					},
+					:design => {
+						:title => "Design changes",
+						:match => /design(?:\((?<group>.+)\))?\: (?<message>.+)/
+					},
+					:refactor => {
+						:title => "Refactoring Changes",
+						:match => /refactor(?:\((?<group>.+)\))?\: (?<message>.+)/
 					},
 					:test => {
 						:title => "Test changes",
@@ -78,7 +86,9 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 				:repo_url => "https://github.com/posixpascal/Changelogr",
 				:groups => true,
 				:start_from => [:commit, :first],
+				:skip_release_check => false,
 				:link_commit_hash => true,
+				:ignore_commits_from_ignored_sections => true
 			}
 			@config = defaults.merge(options)
 			@path = File.dirname(__FILE__)
@@ -124,6 +134,17 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 						section[:commits] = []
 					end
 					sections << section
+				end
+				if section[:ignore] and  @config[:ignore_commits_from_ignored_sections] 
+
+					regex = section[:match]
+					commits_tbd = commits.select do |commit|
+						if commit.message =~ regex
+							commits = commits.select {|c|
+								commit.sha != c.sha
+							}
+						end
+					end
 				end
 			}
 
@@ -209,6 +230,15 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 			
 		end
 
+		def skip_release_check= (val)
+			@config[:skip_release_check] = val
+		end
+
+		def skip_release_check
+			@config[:skip_release_check]
+		end
+
+
 		def repository= (val)
 			@config[:repository] = val
 		end
@@ -216,6 +246,30 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 		def repository
 			@config[:repository]
 		end
+
+		def name= (val)
+			@config[:name] = val
+		end
+
+		def name= (val)
+			@config[:name] = val
+		end
+
+		def logo=
+			@config[:logo]
+		end
+
+		def repo_url
+			@config[:repo_url]
+		end
+
+		def repo_url= (val)
+			@config[:repo_url] = val
+		end
+		def logo
+			@config[:logo]
+		end
+
 
 		def start_from=(val)
 			@config[:start_from] = val
@@ -225,28 +279,45 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 			@config[:start_from]
 		end
 
+		def output=(val)
+			@config[:output] = val
+		end
+
+		def output
+			@config[:output]
+		end
+
 		private
 		def get_starting_sha()
 			commits = @git.commits
 			# lets look for special @bump or @release commits
-			bump_or_releases = commits.select { |commit|
-				commit.with_config @config
-				commit.matches? :bump or commit.matches? :release
-			}
+			if not @config[:skip_release_check]
+				bump_or_releases = commits.select { |commit|
+					commit.with_config @config
+					commit.matches? :bump or commit.matches? :release
+				}
 
-			if bump_or_releases.any?
-				return bump_or_releases.first.sha # return last release or bump commit
+				if bump_or_releases.any?
+					puts "Found release or bump commit. Continuing from there."
+					return bump_or_releases.first.sha # return last release or bump commit
+				else
+					puts "No release or bump commit found. Starting from scratch."
+				end
 			end
 
 			if @config[:start_from][0] == :tag 
 				tagname = @config[:start_from][1].to_s
 				
 			
-
-				tags = @git.tags.select {|commit|
-					commit.name == tagname
+				puts "Finding tag..."
+				p = ProgressBar.create :total => @git.commits.size
+				tags = @git.commits.select {|commit|
+					commit.name == "tags/#{tagname}"
+					p.increment
 				}
+				p.finish
 				if tags.any?
+					puts "Replace [:tag, :#{tagname}] with [:commit, #{tags.first.sha}] for more performance."
 					return tags.first.sha
 				end
 			end
@@ -263,8 +334,9 @@ twitter @pascalraszyk |___| Chaos reigns |___| V0.5
 	module Commit
 		attr_accessor :config
 		def matches? section
-			regex = @config[:sections][section][section]
+			regex = @config[:sections][section][:match]
 			self.message =~ regex
+
 		end
 
 		def with_config config

@@ -11,3 +11,7 @@ Every command is fully flexible by various config files (see `lib/@changelogr.rb
 
 This README is sparse because I need more sleep. I'll add the rest tomorrow.
 // TODO
+
+## Example
+See an example CHANGELOG from this repository:
+https://github.com/posixpascal/Changelogr

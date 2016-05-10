@@ -1,3 +1,4 @@
 <% if version %><a name="<%= version %>"></a><% end %>
 # <%= version ? version : "" %> <%= release_name ? release_name : app_name %> (<%=  Time.now.strftime("%Y-%m-%d") %>)
+<% if @config[:header] %>## <%= @config[:header] %><% end %>
 

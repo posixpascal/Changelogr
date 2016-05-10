@@ -1,2 +1,2 @@
-- <% if group %>**<%=group%>:**<% end %> <%= message %> <% if @config[:link_commit_hash] %>[<%= commit.sha[0..8] %>](<%= @config[:repo_url] %>/commit/<%= commit.sha %>)<% end %>
+- <% if group %>**<%=group%>:**<% end %> <%= message %> <% if @config[:link_commit_hash] %>\[[<%= commit.sha[0..8] %>](<%= @config[:repo_url] %>/commit/<%= commit.sha %>)\]<% end %>
 
